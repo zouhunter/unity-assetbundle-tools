@@ -28,42 +28,60 @@ public class AssetBundleLoader :MonoBehaviour
     }
 #endif
     #region 单例
-    protected static AssetBundleLoader instance = default(AssetBundleLoader);
     private static object lockHelper = new object();
     private static bool isQuit = false;
-    public static AssetBundleLoader GetInstance()
+    private static AssetBundleLoader defult;
+    public static AssetBundleLoader Instence
     {
-        if (instance == null)
+       get
+        {
+            if (defult == null)
+            {
+                lock (lockHelper)
+                {
+                    if (defult == null && !isQuit)
+                    {
+                        GameObject go = new GameObject("AssetBundle");
+                        defult = go.AddComponent<AssetBundleLoader>();
+                        var url =
+#if UNITY_STANDALONE || UNITY_EDITOR
+                           "file://" + Application.streamingAssetsPath + "/AssetBundle";
+#else
+                            Application.streamingAssetsPath + "/AssetBundle";
+#endif
+                        defult.Init(url, "AssetBundle");
+                    }
+                }
+            }
+            return defult;
+        }
+    }
+    public static AssetBundleLoader GetInstance(string url,string menu)
+    {
+        AssetBundleLoader instance = null;
+        if (!loaderDic.TryGetValue(url, out instance))
         {
             lock (lockHelper)
             {
                 if (instance == null && !isQuit)
                 {
-                    GameObject go = new GameObject(typeof(AssetBundleLoader).ToString());
+                    GameObject go = new GameObject(url);
                     instance = go.AddComponent<AssetBundleLoader>();
+                    instance.Init(url,menu);
+                    loaderDic.Add(url, instance);
                 }
             }
         }
         return instance;
     }
+    private bool canSimulation = true;
     protected virtual void Awake()
     {
-        if (instance == null){
-            instance = GetComponent<AssetBundleLoader>();
-        }
         DontDestroyOnLoad(gameObject);
-        InitOnAwake();
     }
     void OnApplicationQuit()
     {
         isQuit = true;
-    }
-    protected virtual void OnDestroy()
-    {
-        if (instance == this)
-        {
-            instance = null;
-        }
     }
     #endregion 
 
@@ -72,13 +90,17 @@ public class AssetBundleLoader :MonoBehaviour
     private bool menuLoaded;
     private Queue<Tuple<string, string, UnityAction<UnityEngine.Object>>> m_LoadObjectQueue =
       new Queue<Tuple<string, string, UnityAction<UnityEngine.Object>>>();
-    protected void InitOnAwake()
+    private static Dictionary<string, AssetBundleLoader> loaderDic = new Dictionary<string, AssetBundleLoader>();
+
+    protected void Init(string url,string menu)
     {
         //资源加载
         UrlAssetBundleLoadCtrl.logMode = AssetBundles.UrlAssetBundleLoadCtrl.LogMode.JustErrors;
-        activeLoader = new UrlAssetBundleLoadCtrl("file:///" + Application.streamingAssetsPath, "AssetBundle");
+        activeLoader = new UrlAssetBundleLoadCtrl(url, menu);
+        canSimulation = url.Contains(Application.streamingAssetsPath);
+
 #if UNITY_EDITOR
-        simuationLoader = new SimulationLoader(this);
+        if(canSimulation) simuationLoader = new SimulationLoader(this);
 #endif
     }
     void Update()
@@ -127,7 +149,7 @@ public class AssetBundleLoader :MonoBehaviour
     public void LoadAssetFromUrlAsync<T>(string assetBundleName, string assetName, UnityAction<T> onAssetLoad) where T : UnityEngine.Object
     {
 #if UNITY_EDITOR
-        if (SimulateAssetBundleInEditor)
+        if (canSimulation && SimulateAssetBundleInEditor)
         {
             simuationLoader.LoadAssetAsync(assetBundleName, assetName, (x) =>
             {
@@ -165,7 +187,7 @@ public class AssetBundleLoader :MonoBehaviour
     public void LoadAssetsFromUrlAsync<T>(string assetBundleName, UnityAction<T[]> onAssetsLoad) where T : UnityEngine.Object
     {
 #if UNITY_EDITOR
-        if (SimulateAssetBundleInEditor)
+        if (canSimulation && SimulateAssetBundleInEditor)
         {
             T[] asset = simuationLoader.LoadAssets<T>(assetBundleName);
             onAssetsLoad(asset);
@@ -196,7 +218,7 @@ public class AssetBundleLoader :MonoBehaviour
     public void LoadAssetsFromUrlAsync<T>(string assetBundleName, string[] assetNames, UnityAction<T[]> allAssetLoad) where T : UnityEngine.Object
     {
 #if UNITY_EDITOR
-        if (SimulateAssetBundleInEditor)
+        if (canSimulation && SimulateAssetBundleInEditor)
         {
             T[] asset = simuationLoader.LoadAssets<T>(assetBundleName, assetNames);
             allAssetLoad(asset);
@@ -244,7 +266,7 @@ public class AssetBundleLoader :MonoBehaviour
     public void LoadLevelFromUrlAsync(string assetBundleName, string assetName, bool isAddictive, UnityAction<float> onProgressChange)
     {
 #if UNITY_EDITOR
-        if (SimulateAssetBundleInEditor)
+        if (canSimulation && SimulateAssetBundleInEditor)
         {
             simuationLoader.LoadSceneAsync(assetBundleName, assetName, isAddictive, onProgressChange);
             return;
@@ -303,6 +325,7 @@ public class AssetBundleLoader :MonoBehaviour
                 {
                     operation.m_Request.allowSceneActivation = true;
                 }
+                onProgressChanged(1);
             }
             yield return null;
         }
