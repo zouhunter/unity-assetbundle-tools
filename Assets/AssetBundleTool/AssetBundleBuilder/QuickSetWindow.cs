@@ -7,8 +7,15 @@ using System;
 using System.IO;
 using System.Text;
 
-public class ArtBundles : EditorWindow
+public class QuickSetWindow : EditorWindow
 {
+    [MenuItem(ABBUtility.Menu_QuickSetter)]
+    static void OpenArtBundleSetterWidow()
+    {
+        QuickSetWindow window = EditorWindow.GetWindow<QuickSetWindow>("assetBundle批量设置", true);
+        window.position = new Rect(400, 300, 600, 400);
+        window.Show();
+    }
     enum ArtType
     {
         Texture,
@@ -29,30 +36,57 @@ public class ArtBundles : EditorWindow
         public string assetBundleName;
         public string bundleappend;
         private AssetImporter importer;
+        private bool changed;
         public BundleAbleAsset(string rootPath, string appendName)
         {
             this.fileName = System.IO.Path.GetFileNameWithoutExtension(rootPath);
             this.rootPath = rootPath;
-            this.bundleappend = appendName.Replace(System.IO.Path.GetFileName(rootPath), fileName);
-            importer = AssetImporter.GetAtPath(rootPath);
-            assetBundleName = importer.assetBundleName;
+            if (fileName.Contains("."))
+            {
+                Debug.LogWarning("文件名不对:" + rootPath + "\n未进行标记");
+                importer = AssetImporter.GetAtPath(rootPath);
+                importer.assetBundleName = assetBundleName = "";
+                importer.SaveAndReimport();
+            }
+            else
+            {
+                this.bundleappend = appendName.Replace(System.IO.Path.GetFileName(rootPath), fileName);
+                importer = AssetImporter.GetAtPath(rootPath);
+                assetBundleName = importer.assetBundleName;
+            }
+
         }
-        public void CreateBundleName(string format,bool removename)
+        public void CreateBundleName(string format, bool removename)
         {
             string append = bundleappend;
-            if(removename){
-                append = bundleappend.Replace("/" + fileName,"");
+            if (removename){
+                append = bundleappend.Replace("/" + fileName, "");
             }
-            assetBundleName = string.Format(format, append);
+
+            var bname = string.Format(format, append).Replace(".", "");
+            if (bname != assetBundleName)
+            {
+                assetBundleName = bname;
+                changed = true;
+            }
         }
         public void RemoveBundleName()
         {
-            assetBundleName = "";
+            if (assetBundleName != "")
+            {
+                assetBundleName = "";
+                changed = true;
+            }
         }
         public void SaveBundleName()
         {
-            importer.assetBundleName = assetBundleName;
-            importer.SaveAndReimport();
+            if (changed)
+            {
+                importer.assetBundleName = assetBundleName;
+                importer.SaveAndReimport();
+                changed = false;
+            }
+
         }
     }
 
@@ -62,11 +96,12 @@ public class ArtBundles : EditorWindow
     BuildType buildType;
     string bundleNameTemp = "{0}";
     string bundleName;
-
+    SerializedProperty script;
     List<BundleAbleAsset> assetFind = new List<BundleAbleAsset>();
     void OnEnable()
     {
         artAssetsFolder = Application.dataPath + "/Projects/Experiment/Details";
+        script = new SerializedObject(this).FindProperty("m_Script");
     }
     void OnGUI()
     {
@@ -80,7 +115,7 @@ public class ArtBundles : EditorWindow
     }
     void DrawHead()
     {
-        EditorGUILayout.SelectableLabel("脚本名：ArtBundles");
+        EditorGUILayout.PropertyField(script);
     }
     private void DrawOptions()
     {
@@ -88,8 +123,8 @@ public class ArtBundles : EditorWindow
         {
             Rect rect = ver.rect;
             rect.size *= 1.01f;
-            BackGroundColor(rect,Color.red);
-            BackGroundColor(rect,Color.blue);
+            BackGroundColor(rect, Color.red);
+            BackGroundColor(rect, Color.green);
 
             Horizontal(() =>
             {
@@ -97,7 +132,15 @@ public class ArtBundles : EditorWindow
                 artAssetsFolder = EditorGUILayout.TextField(artAssetsFolder, GUILayout.Width(300));
                 if (GUILayout.Button(" open "))
                 {
-                    artAssetsFolder = EditorUtility.OpenFolderPanel("选择文件夹", artAssetsFolder, "");
+                    if (Selection.activeObject != null)
+                    {
+                        artAssetsFolder = AssetDatabase.GetAssetPath(Selection.activeObject);
+                        if (artAssetsFolder.Contains("."))
+                        {
+                            artAssetsFolder = System.IO.Path.GetDirectoryName(artAssetsFolder);
+                        }
+                    }
+                    //= EditorUtility.OpenFolderPanel("选择文件夹", artAssetsFolder, "");
                 }
             });
             Horizontal(() =>
@@ -236,17 +279,19 @@ public class ArtBundles : EditorWindow
         switch (artType)
         {
             case ArtType.Texture:
-                BundleBuildUtility.Recursive(artAssetsFolder, "jpg", deepSet, action: (x) => { allFiles.Add(x); });
-                BundleBuildUtility.Recursive(artAssetsFolder, "png", deepSet, action: (x) => { allFiles.Add(x); });
+                ABBUtility.Recursive(artAssetsFolder, "jpg", deepSet, action: (x) => { allFiles.Add(x); });
+                ABBUtility.Recursive(artAssetsFolder, "png", deepSet, action: (x) => { allFiles.Add(x); });
+                ABBUtility.Recursive(artAssetsFolder, "tga", deepSet, action: (x) => { allFiles.Add(x); });
+                ABBUtility.Recursive(artAssetsFolder, "dds", deepSet, action: (x) => { allFiles.Add(x); });
                 break;
             case ArtType.Model:
-                BundleBuildUtility.Recursive(artAssetsFolder, "fbx", deepSet, action: (x) => { allFiles.Add(x); });
+                ABBUtility.Recursive(artAssetsFolder, "fbx", deepSet, action: (x) => { allFiles.Add(x); });
                 break;
             case ArtType.Prefab:
-                BundleBuildUtility.Recursive(artAssetsFolder, "prefab", deepSet, action: (x) => { allFiles.Add(x); });
+                ABBUtility.Recursive(artAssetsFolder, "prefab", deepSet, action: (x) => { allFiles.Add(x); });
                 break;
             case ArtType.Material:
-                BundleBuildUtility.Recursive(artAssetsFolder, "mat", deepSet, action: (x) => { allFiles.Add(x); });
+                ABBUtility.Recursive(artAssetsFolder, "mat", deepSet, action: (x) => { allFiles.Add(x); });
                 break;
             default:
                 break;
@@ -268,7 +313,8 @@ public class ArtBundles : EditorWindow
         {
             case BuildType.Dir:
             case BuildType.Single:
-                if (!bundleNameTemp.Contains("{0}")){
+                if (!bundleNameTemp.Contains("{0}"))
+                {
                     EditorUtility.DisplayDialog("格式问题", "请填入正确的字符串模板", "ok");
                 }
                 else
@@ -308,7 +354,10 @@ public class ArtBundles : EditorWindow
         for (int i = 0; i < assetFind.Count; i++)
         {
             assetFind[i].SaveBundleName();
-            EditorUtility.DisplayProgressBar("bundle信息保存中...", string.Format("进度{0}/{1}",i,assetFind.Count), (float)i / assetFind.Count);
+            bool cansale = EditorUtility.DisplayCancelableProgressBar("bundle信息保存中...", string.Format("进度{0}/{1}", i, assetFind.Count), (float)i / assetFind.Count);
+            if(cansale){
+                break;
+            }
         }
         EditorUtility.ClearProgressBar();
     }
@@ -318,6 +367,6 @@ public class ArtBundles : EditorWindow
         GUI.Box(rect, "");
         GUI.color = Color.white;
     }
-   
+
 
 }

@@ -5,8 +5,16 @@ using UnityEngine.Events;
 using System.Collections;
 using System.Collections.Generic;
 
-public class BundleNameWindow : EditorWindow
+public class BundleViewWindow : EditorWindow
 {
+    [MenuItem(ABBUtility.Menu_BundleName)]
+    static void OpenAssetBundleNameConfigWidow()
+    {
+        BundleViewWindow window = EditorWindow.GetWindow<BundleViewWindow>("assetBundle配制", true);
+        window.position = new Rect(400, 300, 700, 500);
+        window.Show();
+    }
+
     List<AssetImporter> importerList = new List<AssetImporter>();
     Dictionary<AssetImporter, Object> objectList = new Dictionary<AssetImporter, Object>();
     Object waitAdd = null;
@@ -43,7 +51,7 @@ public class BundleNameWindow : EditorWindow
     void LoadFolderAssetBundle(string path)
     {
         List<string> bundleObjs = new List<string>();
-        BundleBuildUtility.RecursiveSub(path, action: (x) => { bundleObjs.Add(x); });
+        ABBUtility.RecursiveSub(path, action: (x) => { bundleObjs.Add(x); });
         for (int i = 0; i < bundleObjs.Count; i++)
         {
             AssetImporter importer = AssetImporter.GetAtPath(FileUtil.GetProjectRelativePath(bundleObjs[i]));

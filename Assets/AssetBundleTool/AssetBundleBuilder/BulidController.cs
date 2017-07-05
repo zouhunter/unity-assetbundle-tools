@@ -7,7 +7,7 @@ using UnityEngine.Events;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace AssetBundle
+namespace AssetBundleBuilder
 {
     public interface IBulidCtrl
     {

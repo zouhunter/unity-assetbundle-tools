@@ -4,7 +4,10 @@ using UnityEngine.Events;
 using System.Collections.Generic;
 using System;
 using System.IO;
-public static class BundleBuildUtility  {
+public static class ABBUtility  {
+    public const string Menu_BuildWindow = "AssetBundle/AssetBundleBuilder/BuilderWindow";
+    public const string Menu_BundleName = "AssetBundle/AssetBundleBuilder/BundleView";
+    public const string Menu_QuickSetter = "AssetBundle/AssetBundleBuilder/QuickSetter";
     /// <summary>
     /// 遍历目录及其子目录
     /// </summary>

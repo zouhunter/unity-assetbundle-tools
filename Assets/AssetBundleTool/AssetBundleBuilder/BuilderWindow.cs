@@ -5,9 +5,21 @@ using UnityEngine.UI;
 using UnityEngine.Events;
 using System.Collections;
 using System.Collections.Generic;
-namespace AssetBundle {
+namespace AssetBundleBuilder {
     public class BuilderWindow : EditorWindow
     {
+        [MenuItem(ABBUtility.Menu_BuildWindow)]
+        static void BuildGlobalAssetBundles()
+        {
+            BuilderWindow window = EditorWindow.GetWindow<BuilderWindow>("全局AssetBundle", true);
+            window.IsSingle = false;
+        }
+        //[MenuItem("Assets/AssetBundle/BuildSelect")]
+        //static void BuildSingleAssetBundle()
+        //{
+        //    BuilderWindow window = EditorWindow.GetWindow<BuilderWindow>("局部AssetBundle", true);
+        //    window.IsSingle = true;
+        //}
         public string assetBundleName;
         public string buildpath = "./Assets/StreamingAssets/AssetBundle";
         public BuildAssetBundleOptions buildOption = BuildAssetBundleOptions.None;
