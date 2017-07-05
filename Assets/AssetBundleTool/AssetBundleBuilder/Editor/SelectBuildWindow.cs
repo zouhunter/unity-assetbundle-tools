@@ -20,7 +20,6 @@ namespace AssetBundleBuilder
         public string buildpath = "";
         public BuildAssetBundleOptions buildOption = BuildAssetBundleOptions.None;
         public BuildTarget buildTarget = BuildTarget.StandaloneWindows;
-        public bool genFile = false;
         private SerializedProperty script;
 
         private Object[] allObject
@@ -73,25 +72,28 @@ namespace AssetBundleBuilder
             buildTarget = (BuildTarget)EditorGUILayout.EnumPopup("BuildTarget", buildTarget);
 
             assetBundleName = EditorGUILayout.TextField("AbName", assetBundleName);
-            if (GUILayout.Button("BuildAllSelected"))
+            using (var hor = new EditorGUILayout.HorizontalScope())
             {
-                ABBUtility.BuildSelectAssets(assetBundleName, buildpath, allObject, buildTarget);
-            }
-            if (GUILayout.Button("BuildSelectedScenes"))
-            {
-                ABBUtility.BuildSelectAssets(assetBundleName, buildpath, selectionScene, buildTarget);
-            }
-            if (GUILayout.Button("BuildSelectedGameObjects"))
-            {
-                ABBUtility.BuildSelectAssets(assetBundleName, buildpath, selectionGameObject, buildTarget);
-            }
-            else if (GUILayout.Button("BuildSelectedMaterials"))
-            {
-                ABBUtility.BuildSelectAssets(assetBundleName, buildpath, selectionMaterial, buildTarget);
-            }
-            else if (GUILayout.Button("BuildSelectedTextures"))
-            {
-                ABBUtility.BuildSelectAssets(assetBundleName, buildpath, selectionTexture, buildTarget);
+                if (GUILayout.Button("BuildAllSelected"))
+                {
+                    ABBUtility.BuildSelectAssets(assetBundleName, buildpath, allObject, buildTarget);
+                }
+                if (GUILayout.Button("BuildSelectedScenes"))
+                {
+                    ABBUtility.BuildSelectAssets(assetBundleName, buildpath, selectionScene, buildTarget);
+                }
+                if (GUILayout.Button("BuildSelectedGameObjects"))
+                {
+                    ABBUtility.BuildSelectAssets(assetBundleName, buildpath, selectionGameObject, buildTarget);
+                }
+                else if (GUILayout.Button("BuildSelectedMaterials"))
+                {
+                    ABBUtility.BuildSelectAssets(assetBundleName, buildpath, selectionMaterial, buildTarget);
+                }
+                else if (GUILayout.Button("BuildSelectedTextures"))
+                {
+                    ABBUtility.BuildSelectAssets(assetBundleName, buildpath, selectionTexture, buildTarget);
+                }
             }
         }
         void SelectionChanged()

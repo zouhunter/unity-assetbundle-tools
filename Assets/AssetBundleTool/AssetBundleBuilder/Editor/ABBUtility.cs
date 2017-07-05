@@ -15,7 +15,7 @@ namespace AssetBundleBuilder
         public const string Menu_SelectBuildWindow = "AssetBundle/AssetBundleBuilder/Builder/SelectBuild";
         public const string Menu_BundleName = "AssetBundle/AssetBundleBuilder/Setter/BundleView";
         public const string Menu_QuickSetter = "AssetBundle/AssetBundleBuilder/Setter/QuickSetter";
-        public static void BuildGlobalAssetBundle(string path, BuildAssetBundleOptions option, BuildTarget target, bool record)
+        public static void BuildGlobalAssetBundle(string path, BuildAssetBundleOptions option, BuildTarget target)
         {
             BuildAllAssetBundles(path, option, target);
         }

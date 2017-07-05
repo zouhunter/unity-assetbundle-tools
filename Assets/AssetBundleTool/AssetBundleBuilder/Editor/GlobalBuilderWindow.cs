@@ -18,7 +18,6 @@ namespace AssetBundleBuilder {
         public string buildpath = "";
         public BuildAssetBundleOptions buildOption = BuildAssetBundleOptions.None;
         public BuildTarget buildTarget = BuildTarget.StandaloneWindows;
-        public bool genFile = false;
         private SerializedProperty script;
 
         private const string Perfer_buildPath = "globalbuildPath";
@@ -53,10 +52,9 @@ namespace AssetBundleBuilder {
          
                 #region 全局打包
                 buildOption = (BuildAssetBundleOptions)EditorGUILayout.EnumMaskField("Options", buildOption);
-                genFile = EditorGUILayout.Toggle("GenFile", genFile);
                 if (GUILayout.Button("GlobleBulid"))
                 {
-                    ABBUtility.BuildGlobalAssetBundle(buildpath, buildOption, buildTarget, genFile);
+                    ABBUtility.BuildGlobalAssetBundle(buildpath, buildOption, buildTarget);
                 }
                 #endregion
         }
