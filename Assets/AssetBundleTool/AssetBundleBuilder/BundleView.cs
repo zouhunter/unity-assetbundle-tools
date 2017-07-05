@@ -4,6 +4,8 @@ using UnityEngine.UI;
 using UnityEngine.Events;
 using System.Collections;
 using System.Collections.Generic;
+namespace AssetBundleBuilder
+{
 
 public class BundleViewWindow : EditorWindow
 {
@@ -169,4 +171,5 @@ public class BundleViewWindow : EditorWindow
             waitDelete = null;
         }
     }
+}
 }

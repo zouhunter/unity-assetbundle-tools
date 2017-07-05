@@ -9,46 +9,17 @@ using System.Collections.Generic;
 
 namespace AssetBundleBuilder
 {
-    public interface IBulidCtrl
-    {
-        void BuildGlobalAssetBundle(string path, BuildAssetBundleOptions option, BuildTarget target, bool record);
-        void BuildSelectAssets(string abName, string path, UnityEngine.Object[] obj, BuildTarget target);
-    }
-    public class BulidController : IBulidCtrl
+    //public interface IBulidCtrl
+    //{
+    //    void BuildGlobalAssetBundle(string path, BuildAssetBundleOptions option, BuildTarget target, bool record);
+    //    void BuildSelectAssets(string abName, string path, UnityEngine.Object[] obj, BuildTarget target);
+    //}
+
+    public class BulidController /*: IBulidCtrl*/
     {
         //private List<string> bundlefiles = new List<string>();
 
-        public void BuildGlobalAssetBundle(string path, BuildAssetBundleOptions option, BuildTarget target, bool record)
-        {
-            BuildAllAssetBundles(path, option, target);
-        }
-        public void BuildSelectAssets(string abName, string path, UnityEngine.Object[] obj, BuildTarget target)
-        {
-            if (!System.IO.Directory.Exists(path))
-            {
-                System.IO.Directory.CreateDirectory(path);
-            }
-            AssetBundleBuild[] builds = new AssetBundleBuild[1];
-            builds[0].assetBundleName = abName;
-            builds[0].assetNames = new string[obj.Length];
-
-            for (int i = 0; i < obj.Length; i++)
-            {
-                builds[0].assetNames[i] = AssetDatabase.GetAssetPath(obj[i]);
-            }
-            BuildPipeline.BuildAssetBundles(path, builds, BuildAssetBundleOptions.DeterministicAssetBundle, target);
-            AssetDatabase.Refresh();
-        }
-
-        void BuildAllAssetBundles(string path, BuildAssetBundleOptions option, BuildTarget target)
-        {
-            if (!System.IO.Directory.Exists(path))
-            {
-                System.IO.Directory.CreateDirectory(path);
-            }
-            /*AssetBundleManifest manifest = */BuildPipeline.BuildAssetBundles(path, option, target);
-        }
-
+       
         //void GetTextFile(string buildpath)
         //{
         //    //string bundleText = buildpath + "/bundles.txt";
