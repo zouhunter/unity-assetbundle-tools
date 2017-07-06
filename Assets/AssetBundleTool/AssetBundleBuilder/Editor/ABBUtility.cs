@@ -36,7 +36,14 @@ namespace AssetBundleBuilder
             BuildPipeline.BuildAssetBundles(path, builds, BuildAssetBundleOptions.DeterministicAssetBundle, target);
             AssetDatabase.Refresh();
         }
-
+        public static void BuildGroupBundles(string path,AssetBundleBuild[] builds, BuildAssetBundleOptions option, BuildTarget target)
+        {
+            if (!System.IO.Directory.Exists(path)) {
+                System.IO.Directory.CreateDirectory(path);
+            }
+            BuildPipeline.BuildAssetBundles(path, builds, BuildAssetBundleOptions.DeterministicAssetBundle, target);
+            AssetDatabase.Refresh();
+        }
         public static void BuildAllAssetBundles(string path, BuildAssetBundleOptions option, BuildTarget target)
         {
             if (!System.IO.Directory.Exists(path)) {
