@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c32ac18fd9835c54dabfa02e34310806, type: 3}
+  m_Name: Option1
+  m_EditorClassIdentifier: 
+  exportPath: C:/Users/Administrator/Desktop/bundle/AssetBundleTools/Assets/StreamingAssets
+  menuName: AssetBundle
+  buildOption: 0
+  buildTarget: 5
+  clearOld: 1
+  needBuilds:
+  - assetPath: Assets/Demo/Prefabs1/Cube1.prefab
+    assetBundleName: bundle/cube
+    obj: {fileID: 101376, guid: dab3bc4b4a62b4a4a85635bce8df8036, type: 2}
+  - assetPath: Assets/Demo/Prefabs1/Sphere1.prefab
+    assetBundleName: 
+    obj: {fileID: 178664, guid: acba6d95522574b46b9f305c3a299220, type: 2}
+  - assetPath: Assets/Demo/Prefabs/Cube.prefab
+    assetBundleName: bundle/cube
+    obj: {fileID: 101376, guid: 41a7ff2265ba8544ea5348d3fe7c53ad, type: 2}
+  - assetPath: Assets/Demo/Prefabs/Sphere.prefab
+    assetBundleName: 
+    obj: {fileID: 178664, guid: df7c4fe81621d7f41b17ae33aa8489be, type: 2}
+  - assetPath: Assets/Demo/Prefabs1/red.mat
+    assetBundleName: 
+    obj: {fileID: 2100000, guid: 7c4912f21f7eec442a4669f0b9cd97f4, type: 2}
+  - assetPath: "Assets/Demo/Prefabs1/Testures/07\u659C\u538B\u6881.jpg"
+    assetBundleName: 
+    obj: {fileID: 2800000, guid: 4d74c7ee37eef0a4ea3e96f9373fc8db, type: 3}
