@@ -204,6 +204,7 @@ namespace AssetBundleBuilder
             else
             {
                 Dictionary<string, LayerNode> nodeDic = new Dictionary<string, AssetBundleBuilder.ConfigBuilderWindow.LayerNode>();
+                nodeDic.Add("Assets", new LayerNode("Assets"));
                 foreach (var item in buildObj.needBuilds)
                 {
                     RetriveAddFolder(item.assetPath, nodeDic);
@@ -219,7 +220,7 @@ namespace AssetBundleBuilder
         private static LayerNode LoadNodesFromDic(Dictionary<string, LayerNode> nodeDic)
         {
             if (nodeDic == null) return null;
-            LayerNode root = null;
+            LayerNode root = nodeDic["Assets"];
             foreach (var item in nodeDic)
             {
                 item.Value.parent = null;
@@ -254,10 +255,6 @@ namespace AssetBundleBuilder
             if (folder.Contains("/"))
             {
                 RetriveAddFolder(folder, nodeDic);
-            }
-            else if (!nodeDic.ContainsKey("Assets"))
-            {
-                nodeDic.Add("Assets", new LayerNode("Assets"));
             }
         }
         private static void StoreLayerNodeToAsset(Dictionary<string, LayerNode> nodeDic, ConfigBuildObj buildObj, bool selectedOnly = false)
