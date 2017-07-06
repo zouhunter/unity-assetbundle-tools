@@ -12,7 +12,7 @@ namespace AssetBundleBuilder
         [MenuItem(ABBUtility.Menu_ConfigBuildWindow)]
         static void BuildSingleAssetBundle()
         {
-          var window =  EditorWindow.GetWindow<ConfigBuilderWindow>("局部AssetBundle", true);
+            var window = EditorWindow.GetWindow<ConfigBuilderWindow>("局部AssetBundle", true);
             window.position = new Rect(100, 200, 800, 520);
         }
         public class LayerNode
@@ -26,7 +26,7 @@ namespace AssetBundleBuilder
             public List<LayerNode> childs = new List<LayerNode>();
             public Object layer { get; private set; }
             public string assetPath { get; private set; }
-          
+
             private GUIContent _spritenormal;
             private string ContentName
             {
@@ -74,6 +74,10 @@ namespace AssetBundleBuilder
                 {
                     _spritenormal = new GUIContent(name, EditorGUIUtility.IconContent("ScriptableObject Icon").image);
                 }
+                else if (layer is SceneAsset)
+                {
+                    _spritenormal = new GUIContent(name, EditorGUIUtility.IconContent("SceneAsset Icon").image);
+                }
                 else
                 {
                     _spritenormal = new GUIContent(name, EditorGUIUtility.IconContent("FolderEmpty Icon").image);
@@ -111,7 +115,7 @@ namespace AssetBundleBuilder
         private void OnEnable()
         {
             _groupff = new GUIContent(EditorGUIUtility.IconContent("IN foldout focus").image);
-            _groupOn =  new GUIContent(EditorGUIUtility.IconContent("IN foldout focus on").image);
+            _groupOn = new GUIContent(EditorGUIUtility.IconContent("IN foldout focus on").image);
             script = new SerializedObject(this).FindProperty("m_Script");
             if (EditorPrefs.HasKey(lastItem))
             {
@@ -135,14 +139,13 @@ namespace AssetBundleBuilder
                 {
                     DrawHeadTools();
                     EditorGUI.indentLevel = 0;
+                    var lastrect = GUILayoutUtility.GetLastRect();
+                    EditorGUI.DrawRect(new Rect(lastrect.x,lastrect.y + EditorGUIUtility.singleLineHeight,lastrect.width,300), new Color(0, 1, 0, 0.1f));
                     using (var scroll = new EditorGUILayout.ScrollViewScope(scrollPos, false, true, GUILayout.Height(300)))
                     {
                         scroll.handleScrollWheel = true;
                         scrollPos = scroll.scrollPosition;
-                        var rect = GUILayoutUtility.GetRect(300, 300);
-                        EditorGUI.DrawRect(rect, new Color(0, 1, 0, 0.1f));
-                        rect.height = EditorGUIUtility.singleLineHeight;
-                        DrawData(rect, rootNode);
+                        DrawData(rootNode);
                     }
                     EditorGUI.indentLevel = 0;
                     DrawBottomTools();
@@ -352,7 +355,7 @@ namespace AssetBundleBuilder
                     {
                         if (item.Value.selected)
                         {
-                            var childs = AssetDatabase.GetDependencies(item.Value.assetPath,true);
+                            var childs = AssetDatabase.GetDependencies(item.Value.assetPath, true);
                             foreach (var child in childs)
                             {
                                 if (!needAdd.Contains(child))
@@ -404,13 +407,12 @@ namespace AssetBundleBuilder
             }
         }
 
-        private Rect DrawData(Rect rt, LayerNode data)
+        private void DrawData(LayerNode data)
         {
-            Rect newRt = rt;
             if (data.content != null)
             {
                 EditorGUI.indentLevel = data.indent;
-                newRt = DrawGUIData(rt, data);
+                DrawGUIData(data);
             }
             if (data.isExpanded)
             {
@@ -420,24 +422,24 @@ namespace AssetBundleBuilder
                     if (child.content != null)
                     {
                         EditorGUI.indentLevel = child.indent;
-                        newRt.y += EditorGUIUtility.singleLineHeight;
                         if (child.childs.Count > 0)
                         {
-                            newRt = DrawData(newRt, child);
+                            DrawData( child);
                         }
                         else
                         {
-                            newRt = DrawGUIData(newRt, child);
+                            DrawGUIData(child);
                         }
                     }
                 }
             }
-            return newRt;
         }
-        private Rect DrawGUIData(Rect rt, LayerNode data)
+        private void DrawGUIData(LayerNode data)
         {
             GUIStyle style = "Label";
-            //Rect rt = GUILayoutUtility.GetRect(data.content, style);
+            Rect rt = GUILayoutUtility.GetRect(300,EditorGUIUtility.singleLineHeight);
+            rt = new Rect(rt.x, rt.y + EditorGUIUtility.singleLineHeight, rt.width, EditorGUIUtility.singleLineHeight);
+
 
             var offset = (16 * EditorGUI.indentLevel);
             var pointWidth = 10;
@@ -466,9 +468,8 @@ namespace AssetBundleBuilder
                     data.Expland(!data.isExpanded);
                 }
             }
-          
+
             EditorGUI.LabelField(rt, data.content);
-            return rt;
         }
 
         private void DrawBottomTools()
