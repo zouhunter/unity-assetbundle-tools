@@ -194,7 +194,9 @@ namespace AssetBundleBuilder
                 if (GUILayout.Button("保存"))
                 {
                     //保存
+                    buildObj.needBuilds.Clear();
                     StoreLayerNodeToAsset(nodeDic, buildObj);
+                    EditorUtility.SetDirty(buildObj);
                 }
             }
         }
@@ -438,7 +440,7 @@ namespace AssetBundleBuilder
         {
             GUIStyle style = "Label";
             Rect rt = GUILayoutUtility.GetRect(300,EditorGUIUtility.singleLineHeight);
-            rt = new Rect(rt.x, rt.y + EditorGUIUtility.singleLineHeight, rt.width, EditorGUIUtility.singleLineHeight);
+            rt = new Rect(rt.x, rt.y , rt.width, EditorGUIUtility.singleLineHeight);
 
 
             var offset = (16 * EditorGUI.indentLevel);

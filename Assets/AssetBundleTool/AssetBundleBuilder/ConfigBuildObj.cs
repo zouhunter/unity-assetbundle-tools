@@ -11,9 +11,9 @@ namespace AssetBundleBuilder
         [System.Serializable]
         public class ObjectItem
         {
-            public Object obj;
-            public string assetBundleName;//需要刷新时可刷新
             public string assetPath;
+            public string assetBundleName;//需要刷新时可刷新
+            public Object obj;
             public ObjectItem(Object obj)
             {
                 this.obj = obj;
