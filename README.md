@@ -8,5 +8,5 @@
 ![3](4.png)
 ## 4.SelectBuild 
 ![4](3.png)
-## 5.SelectBuild 
+## 5.ConfigBuild 
 ![5](5.png)
