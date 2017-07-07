@@ -18,16 +18,19 @@ namespace AssetBundleBuilder
             {
                 this.obj = obj;
             }
-            public void ReFelsh()
+            public bool ReFelsh()
             {
-                if (obj == null){
+                if (obj == null)
+                {
                     Debug.LogError("assetPath :" + assetPath + "关联丢失");
+                    return false;
                 }
                 else
                 {
                     assetPath = AssetDatabase.GetAssetPath(obj);
                     AssetImporter importer = AssetImporter.GetAtPath(assetPath);
                     assetBundleName = importer.assetBundleName;
+                    return true;
                 }
             }
         }
@@ -44,7 +47,8 @@ namespace AssetBundleBuilder
             Dictionary<string, AssetBundleBuild> bundleDic = new Dictionary<string, AssetBundleBuild>();
             foreach (var item in needBuilds)
             {
-                if (!bundleDic.ContainsKey(item.assetBundleName)){
+                if (!bundleDic.ContainsKey(item.assetBundleName))
+                {
                     bundleDic.Add(item.assetBundleName, new AssetBundleBuild());
                 }
                 var asb = bundleDic[item.assetBundleName];
@@ -64,9 +68,14 @@ namespace AssetBundleBuilder
 
         public void ReFelsh()
         {
-            foreach (var item in needBuilds)
+            var oldItems = needBuilds.ToArray();
+            foreach (var item in oldItems)
             {
-                item.ReFelsh();
+                if (!item.ReFelsh())
+                {
+                    needBuilds.Remove(item);
+                    Debug.LogError("已经移除：" + item.assetPath);
+                }
             }
         }
     }

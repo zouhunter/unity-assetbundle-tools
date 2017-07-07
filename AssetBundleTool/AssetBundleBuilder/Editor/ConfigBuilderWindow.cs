@@ -5,6 +5,8 @@ using UnityEngine.UI;
 using UnityEngine.Events;
 using System.Collections;
 using System.Collections.Generic;
+using System;
+using Object = UnityEngine.Object;
 namespace AssetBundleBuilder
 {
     public class ConfigBuilderWindow : EditorWindow
@@ -50,47 +52,14 @@ namespace AssetBundleBuilder
                 this.indent = assetPath.Split('/').Length;
                 isFolder = ProjectWindowUtil.IsFolder(layer.GetInstanceID());
                 var name = ContentName;
-
-                if (layer is Texture)
-                {
-                    _spritenormal = new GUIContent(name, EditorGUIUtility.IconContent("Texture Icon").image);
-                }
-                else if (layer is Material)
-                {
-                    _spritenormal = new GUIContent(name, EditorGUIUtility.IconContent("Material Icon").image);
-                }
-                else if (layer is GameObject)
-                {
-                    if (assetPath.EndsWith(".prefab"))
-                    {
-                        _spritenormal = new GUIContent(name, EditorGUIUtility.IconContent("PrefabNormal Icon").image);
-                    }
-                    else
-                    {
-                        _spritenormal = new GUIContent(name, EditorGUIUtility.IconContent("MeshRenderer Icon").image);
-                    }
-                }
-                else if (layer is ScriptableObject)
-                {
-                    _spritenormal = new GUIContent(name, EditorGUIUtility.IconContent("ScriptableObject Icon").image);
-                }
-                else if (layer is SceneAsset)
-                {
-                    _spritenormal = new GUIContent(name, EditorGUIUtility.IconContent("SceneAsset Icon").image);
-                }
-                else
-                {
-                    _spritenormal = new GUIContent(name, EditorGUIUtility.IconContent("FolderEmpty Icon").image);
-                }
-
+               _spritenormal = new GUIContent(name, AssetDatabase.GetCachedIcon(assetPath));
+                
                 content = _spritenormal;
                 isExpanded = true;
             }
 
             public void Expland(bool on)
             {
-                //content = on ? _groupOn : _groupff;
-                //content.text = ContentName;
                 isExpanded = on;
             }
             public void Select(bool on)
@@ -132,6 +101,7 @@ namespace AssetBundleBuilder
                 DrawObjOptions();
                 if (rootNode == null)
                 {
+                    buildObj.ReFelsh();
                     nodeDic = LoadDicFromObj(buildObj);
                     rootNode = LoadNodesFromDic(nodeDic);
                 }
@@ -140,7 +110,10 @@ namespace AssetBundleBuilder
                     DrawHeadTools();
                     EditorGUI.indentLevel = 0;
                     var lastrect = GUILayoutUtility.GetLastRect();
-                    EditorGUI.DrawRect(new Rect(lastrect.x,lastrect.y + EditorGUIUtility.singleLineHeight,lastrect.width,300), new Color(0, 1, 0, 0.1f));
+                    var viewRect = new Rect(lastrect.x, lastrect.y + EditorGUIUtility.singleLineHeight, lastrect.width, 300);
+                    EditorGUI.DrawRect(viewRect, new Color(0, 1, 0, 0.1f));
+                    AcceptDrop(viewRect);
+
                     using (var scroll = new EditorGUILayout.ScrollViewScope(scrollPos, false, true, GUILayout.Height(300)))
                     {
                         scroll.handleScrollWheel = true;
@@ -151,6 +124,58 @@ namespace AssetBundleBuilder
                     DrawBottomTools();
                 }
             }
+        }
+
+        private void AcceptDrop(Rect viewRect)
+        {
+            switch (Event.current.type)
+            {
+                case EventType.DragUpdated:
+                    if (viewRect.Contains(Event.current.mousePosition))
+                    {
+                        DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
+                    }
+                    else
+                    {
+                        DragAndDrop.visualMode = DragAndDropVisualMode.None;
+                    }
+                    break;
+                case EventType.DragPerform:
+                    if (viewRect.Contains(Event.current.mousePosition))
+                    {
+                        if (DragAndDrop.paths != null && DragAndDrop.paths.Length > 0)
+                        {
+                            AddGroupOfObject(DragAndDrop.paths);
+                        }
+                    }
+                    break;
+                case EventType.DragExited:
+                    Debug.Log("DragExited");
+                    break;
+                default:
+                    break;
+            }
+        }
+        private void AddGroupOfObject(params string[] paths)
+        {
+            foreach (var item in paths)
+            {
+                var assetPath = item;
+                RetriveObject(assetPath, (x) =>
+                {
+                    RetriveAddFolder(assetPath, nodeDic);
+
+                    assetPath = AssetDatabase.GetAssetPath(x);
+
+                    if (!nodeDic.ContainsKey(assetPath))
+                    {
+                        nodeDic.Add(assetPath, new LayerNode(assetPath));
+                    }
+                });
+
+            }
+          
+            rootNode = LoadNodesFromDic(nodeDic);
         }
         private bool DrawObjectHolder()
         {
@@ -309,6 +334,12 @@ namespace AssetBundleBuilder
                             RetriveObject(path, OnRetrive);
                         }
                     }
+                    var folders = System.IO.Directory.GetDirectories(root);
+                    foreach (var item in folders)
+                    {
+                        var path = item.Replace(Application.dataPath, "Assets");
+                        RetriveObject(path, OnRetrive);
+                    }
                 }
             }
 
@@ -324,17 +355,8 @@ namespace AssetBundleBuilder
                     if (Selection.activeObject == null) return;
 
                     var assetPath = AssetDatabase.GetAssetPath(Selection.activeObject);
-                    RetriveObject(assetPath, (x) =>
-                    {
-                        assetPath = AssetDatabase.GetAssetPath(x);
 
-                        if (!nodeDic.ContainsKey(assetPath))
-                        {
-                            nodeDic.Add(assetPath, new LayerNode(assetPath));
-                        }
-                    });
-
-                    rootNode = LoadNodesFromDic(nodeDic);
+                    AddGroupOfObject(assetPath);
                 }
                 if (GUILayout.Button(new GUIContent("-", "移除选中"), GUILayout.Width(20)))
                 {
@@ -426,7 +448,7 @@ namespace AssetBundleBuilder
                         EditorGUI.indentLevel = child.indent;
                         if (child.childs.Count > 0)
                         {
-                            DrawData( child);
+                            DrawData(child);
                         }
                         else
                         {
@@ -439,8 +461,8 @@ namespace AssetBundleBuilder
         private void DrawGUIData(LayerNode data)
         {
             GUIStyle style = "Label";
-            Rect rt = GUILayoutUtility.GetRect(300,EditorGUIUtility.singleLineHeight);
-            rt = new Rect(rt.x, rt.y , rt.width, EditorGUIUtility.singleLineHeight);
+            Rect rt = GUILayoutUtility.GetRect(300, EditorGUIUtility.singleLineHeight);
+            rt = new Rect(rt.x, rt.y, rt.width, EditorGUIUtility.singleLineHeight);
 
 
             var offset = (16 * EditorGUI.indentLevel);
