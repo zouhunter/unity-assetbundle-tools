@@ -35,49 +35,14 @@ namespace AssetBundleBuilder
             }
         }
         public string ExportPath { get { return exportPath + "/" + menuName; } }
+        public string LocalPath { get { return exportPath1 + "/" + menuName; } }
         public string exportPath;
+        public string exportPath1;
         public string menuName;
         public BuildAssetBundleOptions buildOption = BuildAssetBundleOptions.None;
         public BuildTarget buildTarget = BuildTarget.StandaloneWindows;
         public bool clearOld;
         public List<ObjectItem> needBuilds = new List<ObjectItem>();
-
-        public AssetBundleBuild[] GetBundleBuilds()
-        {
-            Dictionary<string, AssetBundleBuild> bundleDic = new Dictionary<string, AssetBundleBuild>();
-            foreach (var item in needBuilds)
-            {
-                if (!bundleDic.ContainsKey(item.assetBundleName))
-                {
-                    bundleDic.Add(item.assetBundleName, new AssetBundleBuild());
-                }
-                var asb = bundleDic[item.assetBundleName];
-
-                asb.assetBundleName = item.assetBundleName;
-                if (asb.assetNames == null) asb.assetNames = new string[0];
-                List<string> assetNames = new List<string>(asb.assetNames);
-                assetNames.Add(item.assetPath);
-                asb.assetNames = assetNames.ToArray();
-
-                bundleDic[item.assetBundleName] = asb;
-            }
-
-            List<AssetBundleBuild> builds = new List<AssetBundleBuild>(bundleDic.Values);
-            return builds.ToArray();
-        }
-
-        public void ReFelsh()
-        {
-            var oldItems = needBuilds.ToArray();
-            foreach (var item in oldItems)
-            {
-                if (!item.ReFelsh())
-                {
-                    needBuilds.Remove(item);
-                    Debug.LogError("已经移除：" + item.assetPath);
-                }
-            }
-        }
     }
 }
 #endif
