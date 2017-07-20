@@ -34,10 +34,10 @@ namespace AssetBundleBuilder
                 }
             }
         }
-        public string ExportPath { get { return exportPath + "/" + menuName; } }
-        public string LocalPath { get { return exportPath1 + "/" + menuName; } }
-        public string exportPath;
-        public string exportPath1;
+        public string LocalPath { get { return localPath + "/" + menuName; } }
+        public string TargetPath { get { return targetPath + "/" + menuName; } }
+        public string localPath;
+        public string targetPath;
         public string menuName;
         public BuildAssetBundleOptions buildOption = BuildAssetBundleOptions.None;
         public BuildTarget buildTarget = BuildTarget.StandaloneWindows;

@@ -74,7 +74,9 @@ public class AssetBundleLoader :MonoBehaviour
         }
         return instance;
     }
+#if UNITY_EDITOR
     private bool canSimulation = true;
+#endif
     protected virtual void Awake()
     {
         DontDestroyOnLoad(gameObject);
@@ -97,9 +99,9 @@ public class AssetBundleLoader :MonoBehaviour
         //资源加载
         UrlAssetBundleLoadCtrl.logMode = AssetBundles.UrlAssetBundleLoadCtrl.LogMode.JustErrors;
         activeLoader = new UrlAssetBundleLoadCtrl(url, menu);
-        canSimulation = url.Contains(Application.streamingAssetsPath);
 
 #if UNITY_EDITOR
+        canSimulation = url.Contains(Application.streamingAssetsPath);
         if(canSimulation) simuationLoader = new SimulationLoader(this);
 #endif
     }

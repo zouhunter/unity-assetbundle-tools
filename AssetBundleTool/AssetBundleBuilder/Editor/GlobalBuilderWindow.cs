@@ -15,38 +15,58 @@ namespace AssetBundleBuilder {
         }
         
         public string assetBundleName;
-        public string buildpath = "";
+        public string localPath = "";
+        public string targetPath = "";
         public BuildAssetBundleOptions buildOption = BuildAssetBundleOptions.None;
         public BuildTarget buildTarget = BuildTarget.StandaloneWindows;
         private SerializedProperty script;
 
         private const string Perfer_buildPath = "globalbuildPath";
+        private const string Perfer_localPath = "localglobalbuildPath";
 
         void OnEnable()
         {
             script = new SerializedObject(this).FindProperty("m_Script");
             if (EditorPrefs.HasKey(Perfer_buildPath))
             {
-                buildpath = EditorPrefs.GetString(Perfer_buildPath);
+                localPath = EditorPrefs.GetString(Perfer_buildPath);
             }
         }
         void OnGUI()
         {
             EditorGUILayout.PropertyField(script);
             EditorGUILayout.BeginHorizontal();
-            buildpath = EditorGUILayout.TextField("ExportTo", buildpath);
+            localPath = EditorGUILayout.TextField("ExportTo", localPath);
             if (GUILayout.Button("选择路径"))
             {
-                var path = EditorUtility.SaveFolderPanel("选择保存路径", buildpath, "");
+                var path = EditorUtility.SaveFolderPanel("选择保存路径", localPath, "");
                 if (!string.IsNullOrEmpty(path))
                 {
-                    buildpath = path;
-                    EditorPrefs.SetString(Perfer_buildPath, buildpath);
+                    localPath = path;
+                    EditorPrefs.SetString(Perfer_buildPath, localPath);
                     this.Repaint();
                 }
             }
             EditorGUILayout.EndHorizontal();
-
+            using (var hor = new EditorGUILayout.HorizontalScope())
+            {
+                targetPath = EditorGUILayout.TextField("CopyTo", targetPath);
+                if (GUILayout.Button("选择路径"))
+                {
+                    var path = EditorUtility.SaveFolderPanel("选择本地路径", targetPath, "");
+                    if (!string.IsNullOrEmpty(path))
+                    {
+                        targetPath = path;
+                        EditorPrefs.SetString(Perfer_buildPath, targetPath);
+                        this.Repaint();
+                    }
+                }
+                if (GUILayout.Button("Copy"))
+                {
+                    FileUtil.DeleteFileOrDirectory(targetPath);
+                    FileUtil.CopyFileOrDirectory(localPath, targetPath);
+                }
+            }
             buildTarget = (BuildTarget)EditorGUILayout.EnumPopup("BuildTarget", buildTarget);
 
          
@@ -54,7 +74,7 @@ namespace AssetBundleBuilder {
                 buildOption = (BuildAssetBundleOptions)EditorGUILayout.EnumMaskField("Options", buildOption);
                 if (GUILayout.Button("GlobleBulid"))
                 {
-                    ABBUtility.BuildGlobalAssetBundle(buildpath, buildOption, buildTarget);
+                    ABBUtility.BuildGlobalAssetBundle(localPath, buildOption, buildTarget);
                 }
                 #endregion
         }

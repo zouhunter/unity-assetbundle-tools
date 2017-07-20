@@ -72,8 +72,8 @@ namespace AssetBundleBuilder
             }
         }
         private SerializedProperty script;
-        private SerializedProperty exportPath_prop;
-        private SerializedProperty exportPath1_prop;
+        private SerializedProperty localPath_prop;
+        private SerializedProperty targetPath_prop;
         private SerializedProperty menuName_prop;
 
         private LayerNode rootNode;
@@ -88,9 +88,9 @@ namespace AssetBundleBuilder
             _groupff = new GUIContent(EditorGUIUtility.IconContent("IN foldout focus").image);
             _groupOn = new GUIContent(EditorGUIUtility.IconContent("IN foldout focus on").image);
             script = serializedObject.FindProperty("m_Script");
-            exportPath_prop = serializedObject.FindProperty("exportPath");
+            localPath_prop = serializedObject.FindProperty("localPath");
             menuName_prop = serializedObject.FindProperty("menuName");
-            exportPath1_prop = serializedObject.FindProperty("exportPath1");
+            targetPath_prop = serializedObject.FindProperty("targetPath");
             ReFelsh((target as ConfigBuildObj).needBuilds);
             nodeDic = LoadDicFromObj((ConfigBuildObj)target);
             rootNode = LoadNodesFromDic(nodeDic);
@@ -180,20 +180,11 @@ namespace AssetBundleBuilder
             {
                 using (var hor = new EditorGUILayout.HorizontalScope())
                 {
-                    EditorGUILayout.LabelField("[资源导出路径]:", GUILayout.Width(100));
-                    exportPath_prop.stringValue = EditorGUILayout.TextField(exportPath_prop.stringValue);
+                    EditorGUILayout.LabelField("[导出路径]:", GUILayout.Width(100));
+                    localPath_prop.stringValue = EditorGUILayout.TextField(localPath_prop.stringValue);
                     if (GUILayout.Button("选择"))
                     {
-                        exportPath_prop.stringValue = EditorUtility.OpenFolderPanel("选择文件路径", exportPath_prop.stringValue, "");
-                    }
-                }
-                using (var hor = new EditorGUILayout.HorizontalScope())
-                {
-                    EditorGUILayout.LabelField("[本地拷贝路径]:", GUILayout.Width(100));
-                    exportPath1_prop.stringValue = EditorGUILayout.TextField(exportPath1_prop.stringValue);
-                    if (GUILayout.Button("选择"))
-                    {
-                        exportPath1_prop.stringValue = EditorUtility.OpenFolderPanel("选择文件路径", exportPath1_prop.stringValue, "");
+                        localPath_prop.stringValue = EditorUtility.OpenFolderPanel("选择文件路径", localPath_prop.stringValue, "");
                     }
                 }
                 using (var hor = new EditorGUILayout.HorizontalScope())
@@ -508,30 +499,35 @@ namespace AssetBundleBuilder
             {
                 if (GUILayout.Button("生成AB(全部)"))
                 {
-                    if (buildObj.clearOld) FileUtil.DeleteFileOrDirectory(buildObj.ExportPath);
+                    if (buildObj.clearOld) FileUtil.DeleteFileOrDirectory(buildObj.LocalPath);
 
                     ConfigBuildObj bo = ScriptableObject.CreateInstance<ConfigBuildObj>();
                     StoreLayerNodeToAsset(nodeDic, bo);
-                    ABBUtility.BuildGroupBundles(buildObj.ExportPath, GetBundleBuilds(buildObj.needBuilds), buildObj.buildOption, buildObj.buildTarget);
-
-                    if (buildObj.ExportPath != buildObj.LocalPath && !string.IsNullOrEmpty(buildObj.LocalPath))
-                    {
-                        FileUtil.DeleteFileOrDirectory(buildObj.LocalPath);
-                        FileUtil.CopyFileOrDirectory(buildObj.ExportPath, buildObj.LocalPath);
-                    }
+                    ABBUtility.BuildGroupBundles(buildObj.LocalPath, GetBundleBuilds(buildObj.needBuilds), buildObj.buildOption, buildObj.buildTarget);
                 }
                 if (GUILayout.Button("生成AB(选中)"))
                 {
-                    if (buildObj.clearOld) FileUtil.DeleteFileOrDirectory(buildObj.ExportPath);
+                    if (buildObj.clearOld) FileUtil.DeleteFileOrDirectory(buildObj.LocalPath);
 
                     ConfigBuildObj bo = ScriptableObject.CreateInstance<ConfigBuildObj>();
                     StoreLayerNodeToAsset(nodeDic, bo, true);
-                    ABBUtility.BuildGroupBundles(buildObj.ExportPath, GetBundleBuilds(buildObj.needBuilds), buildObj.buildOption, buildObj.buildTarget);
-
-                    if (buildObj.ExportPath != buildObj.LocalPath && !string.IsNullOrEmpty(buildObj.LocalPath))
+                    ABBUtility.BuildGroupBundles(buildObj.LocalPath, GetBundleBuilds(buildObj.needBuilds), buildObj.buildOption, buildObj.buildTarget);
+                }
+            }
+            using (var hor = new EditorGUILayout.HorizontalScope())
+            {
+                EditorGUILayout.LabelField("[拷贝到路径]:", GUILayout.Width(100));
+                targetPath_prop.stringValue = EditorGUILayout.TextField(targetPath_prop.stringValue);
+                if (GUILayout.Button("选择"))
+                {
+                    targetPath_prop.stringValue = EditorUtility.OpenFolderPanel("选择文件路径", targetPath_prop.stringValue, "");
+                }
+                if (GUILayout.Button("拷贝"))
+                {
+                    if (buildObj.LocalPath != buildObj.TargetPath && !string.IsNullOrEmpty(buildObj.TargetPath))
                     {
-                        FileUtil.DeleteFileOrDirectory(buildObj.LocalPath);
-                        FileUtil.CopyFileOrDirectory(buildObj.ExportPath, buildObj.LocalPath);
+                        FileUtil.DeleteFileOrDirectory(buildObj.TargetPath);
+                        FileUtil.CopyFileOrDirectory(buildObj.LocalPath, buildObj.TargetPath);
                     }
                 }
             }
