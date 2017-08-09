@@ -15,7 +15,7 @@ namespace AssetBundleBuilder
         public const string Menu_SelectBuildWindow = "AssetBundle/AssetBundleBuilder/Builder/SelectBuild";
         public const string Menu_BundleName = "AssetBundle/AssetBundleBuilder/Setter/BundleView";
         public const string Menu_QuickSetter = "AssetBundle/AssetBundleBuilder/Setter/QuickSetter";
-        [MenuItem(Menu_SelectBuildWindow)]
+        [MenuItem(Menu_ConfigBuildWindow)]
         public static void CreateSelectBuild()
         {
             ProjectWindowUtil.CreateAsset(ScriptableObject.CreateInstance<ConfigBuildObj>(), "ConfigBuildObj.asset");
