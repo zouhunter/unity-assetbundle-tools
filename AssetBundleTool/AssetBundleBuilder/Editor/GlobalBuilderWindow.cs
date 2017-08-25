@@ -27,9 +27,9 @@ namespace AssetBundleBuilder {
         void OnEnable()
         {
             script = new SerializedObject(this).FindProperty("m_Script");
-            if (EditorPrefs.HasKey(Perfer_buildPath))
+            if (PlayerPrefs.HasKey(Perfer_buildPath))
             {
-                localPath = EditorPrefs.GetString(Perfer_buildPath);
+                localPath = PlayerPrefs.GetString(Perfer_buildPath);
             }
         }
         void OnGUI()
@@ -43,7 +43,7 @@ namespace AssetBundleBuilder {
                 if (!string.IsNullOrEmpty(path))
                 {
                     localPath = path;
-                    EditorPrefs.SetString(Perfer_buildPath, localPath);
+                    PlayerPrefs.SetString(Perfer_buildPath, localPath);
                     this.Repaint();
                 }
             }
@@ -57,7 +57,7 @@ namespace AssetBundleBuilder {
                     if (!string.IsNullOrEmpty(path))
                     {
                         targetPath = path;
-                        EditorPrefs.SetString(Perfer_buildPath, targetPath);
+                        PlayerPrefs.SetString(Perfer_buildPath, targetPath);
                         this.Repaint();
                     }
                 }
