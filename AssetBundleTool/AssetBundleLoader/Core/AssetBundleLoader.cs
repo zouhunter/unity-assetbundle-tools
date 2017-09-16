@@ -10,6 +10,7 @@ using AssetBundleReference.Tuples;
 
 public class AssetBundleLoader :MonoBehaviour
 {
+    private const string defultMenu = "AssetBundle";
 #if UNITY_EDITOR
     //private static int m_SimulateAssetBundleInEditor;
     private static string kSimulateAssetBundles = "simulateinEditor";
@@ -41,15 +42,15 @@ public class AssetBundleLoader :MonoBehaviour
                 {
                     if (defult == null && !isQuit)
                     {
-                        GameObject go = new GameObject("AssetBundle");
+                        GameObject go = new GameObject(defultMenu);
                         defult = go.AddComponent<AssetBundleLoader>();
                         var url =
 #if UNITY_STANDALONE || UNITY_EDITOR
-                           "file://" + Application.streamingAssetsPath + "/AssetBundle";
+                           "file://" + Application.streamingAssetsPath + "/" + defultMenu;
 #else
-                            Application.streamingAssetsPath + "/AssetBundle";
+                            Application.streamingAssetsPath + "/" + defultMenu;
 #endif
-                        defult.Init(url, "AssetBundle");
+                        defult.Init(url, defultMenu);
                     }
                 }
             }
@@ -101,7 +102,7 @@ public class AssetBundleLoader :MonoBehaviour
         activeLoader = new UrlAssetBundleLoadCtrl(url, menu);
 
 #if UNITY_EDITOR
-        canSimulation = url.Contains(Application.streamingAssetsPath);
+        canSimulation = url.Contains(Application.streamingAssetsPath + "/" + defultMenu);
         if(canSimulation) simuationLoader = new SimulationLoader(this);
 #endif
     }
