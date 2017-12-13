@@ -85,7 +85,8 @@ namespace AssetBundleBuilder
         private Dictionary<string, LayerNode> nodeDic;
         private GUIContent _groupff;
         private GUIContent _groupOn;
-
+            
+        private float rectHeight = 400;
         private void OnEnable()
         {
             _groupff = new GUIContent(EditorGUIUtility.IconContent("IN foldout focus").image);
@@ -106,12 +107,12 @@ namespace AssetBundleBuilder
             DrawHeadTools();
             EditorGUI.indentLevel = 0;
             var lastrect = GUILayoutUtility.GetLastRect();
-            var viewRect = new Rect(lastrect.x, lastrect.y + EditorGUIUtility.singleLineHeight, lastrect.width, 300);
+            var viewRect = new Rect(lastrect.x, lastrect.y + EditorGUIUtility.singleLineHeight * 1.2f, lastrect.width, rectHeight);
             EditorGUI.DrawRect(viewRect, new Color(0, 1, 0, 0.1f));
 
             AcceptDrop(viewRect);
 
-            using (var scroll = new EditorGUILayout.ScrollViewScope(scrollPos, false, true, GUILayout.Height(300)))
+            using (var scroll = new EditorGUILayout.ScrollViewScope(scrollPos, false, true, GUILayout.Height(rectHeight)))
             {
                 scroll.handleScrollWheel = true;
                 scrollPos = scroll.scrollPosition;
@@ -184,7 +185,10 @@ namespace AssetBundleBuilder
                     localPath_prop.stringValue = EditorGUILayout.TextField(localPath_prop.stringValue);
                     if (GUILayout.Button("选择"))
                     {
-                        localPath_prop.stringValue = EditorUtility.OpenFolderPanel("选择文件路径", localPath_prop.stringValue, "");
+                        var path = EditorUtility.OpenFolderPanel("选择文件路径", localPath_prop.stringValue, "");
+                        if(!string.IsNullOrEmpty(path)){
+                            localPath_prop.stringValue = path;
+                        }
                     }
                 }
                 using (var hor = new EditorGUILayout.HorizontalScope())
@@ -482,28 +486,27 @@ namespace AssetBundleBuilder
         private void DrawBottomTools()
         {
             var buildObj = target as ConfigBuildObj;
-
-          
-
+            GUIStyle labStyle = EditorStyles.miniBoldLabel;
+            GUILayoutOption labLayout = GUILayout.Width(100);
             using (var hor = new EditorGUILayout.HorizontalScope())
             {
-                EditorGUILayout.SelectableLabel("[目标平台]：");
+                EditorGUILayout.LabelField("[目标平台]：", labStyle, labLayout);
                 buildObj.buildTarget = (BuildTarget)EditorGUILayout.EnumPopup(buildObj.buildTarget);
             }
             using (var hor = new EditorGUILayout.HorizontalScope())
             {
-                EditorGUILayout.SelectableLabel("[打包选项]：");
+                EditorGUILayout.LabelField("[打包选项]：", labStyle, labLayout);
                 buildObj.buildOption = (BuildAssetBundleOptions)EditorGUILayout.EnumMaskField(buildObj.buildOption);
             }
             using (var hor = new EditorGUILayout.HorizontalScope())
             {
-                EditorGUILayout.SelectableLabel("[清空文件]：");
+                EditorGUILayout.LabelField("[清空文件]：", labStyle, labLayout);
                 buildObj.clearOld = EditorGUILayout.Toggle(buildObj.clearOld);
             }
 
             using (var hor = new EditorGUILayout.HorizontalScope())
             {
-                if (GUILayout.Button("生成AB(全部)"))
+                if (GUILayout.Button("生成AB(全部)",EditorStyles.toolbarDropDown))
                 {
                     if (buildObj.clearOld) FileUtil.DeleteFileOrDirectory(buildObj.LocalPath);
 
@@ -511,7 +514,7 @@ namespace AssetBundleBuilder
                     StoreLayerNodeToAsset(nodeDic, bo);
                     ABBUtility.BuildGroupBundles(buildObj.LocalPath, GetBundleBuilds(buildObj.needBuilds), buildObj.buildOption, buildObj.buildTarget);
                 }
-                if (GUILayout.Button("生成AB(选中)"))
+                if (GUILayout.Button("生成AB(选中)", EditorStyles.toolbarDropDown))
                 {
                     if (buildObj.clearOld) FileUtil.DeleteFileOrDirectory(buildObj.LocalPath);
 
@@ -526,7 +529,11 @@ namespace AssetBundleBuilder
                 targetPath_prop.stringValue = EditorGUILayout.TextField(targetPath_prop.stringValue);
                 if (GUILayout.Button("选择"))
                 {
-                    targetPath_prop.stringValue = EditorUtility.OpenFolderPanel("选择文件路径", targetPath_prop.stringValue, "");
+                    var path = EditorUtility.OpenFolderPanel("选择文件路径", targetPath_prop.stringValue, "");
+                    if(!string.IsNullOrEmpty(path))
+                    {
+                        targetPath_prop.stringValue = path;
+                    }
                 }
                 if (GUILayout.Button("拷贝"))
                 {
