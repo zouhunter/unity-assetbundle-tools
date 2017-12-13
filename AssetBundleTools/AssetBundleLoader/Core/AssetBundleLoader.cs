@@ -50,6 +50,7 @@ public class AssetBundleLoader :MonoBehaviour
 #else
                             Application.streamingAssetsPath + "/" + defultMenu;
 #endif
+                        loaderDic.Add(url, defult);
                         defult.Init(url, defultMenu);
                     }
                 }

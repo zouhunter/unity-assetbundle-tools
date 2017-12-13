@@ -6,12 +6,12 @@ using UnityEngine.Events;
 using System.Collections;
 using System.Collections.Generic;
 namespace AssetBundleBuilder {
-    public class GlobalBuilderWindow : EditorWindow
+    public class ProjectsBuilderWindow : EditorWindow
     {
-        [MenuItem(ABBUtility.Menu_GlobalBuildWindow)]
-        static void BuildGlobalAssetBundles()
+        [MenuItem(ABBUtility.Menu_ProjectsBuildWindow)]
+        static void BuildProjectsAssetBundles()
         {
-            EditorWindow.GetWindow<GlobalBuilderWindow>("全局AssetBundle", true);
+            EditorWindow.GetWindow<ProjectsBuilderWindow>("全局AssetBundle", true);
         }
         
         public string assetBundleName;
@@ -74,7 +74,7 @@ namespace AssetBundleBuilder {
                 buildOption = (BuildAssetBundleOptions)EditorGUILayout.EnumMaskField("Options", buildOption);
                 if (GUILayout.Button("GlobleBulid"))
                 {
-                    ABBUtility.BuildGlobalAssetBundle(localPath, buildOption, buildTarget);
+                    ABBUtility.BuildProjectsAssetBundle(localPath, buildOption, buildTarget);
                 }
                 #endregion
         }

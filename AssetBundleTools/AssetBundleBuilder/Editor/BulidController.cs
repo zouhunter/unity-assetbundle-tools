@@ -11,7 +11,7 @@ namespace AssetBundleBuilder
 {
     //public interface IBulidCtrl
     //{
-    //    void BuildGlobalAssetBundle(string path, BuildAssetBundleOptions option, BuildTarget target, bool record);
+    //    void BuildProjectsAssetBundle(string path, BuildAssetBundleOptions option, BuildTarget target, bool record);
     //    void BuildSelectAssets(string abName, string path, UnityEngine.Object[] obj, BuildTarget target);
     //}
 

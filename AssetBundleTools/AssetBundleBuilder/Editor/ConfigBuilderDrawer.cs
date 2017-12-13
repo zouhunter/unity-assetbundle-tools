@@ -9,68 +9,70 @@ using System;
 using Object = UnityEngine.Object;
 namespace AssetBundleBuilder
 {
+    public class LayerNode
+    {
+        public bool isExpanded { get; private set; }
+        public bool isFolder;
+        public bool selected { get; private set; }
+        public int indent { get; private set; }
+        public GUIContent content;
+        public LayerNode parent;
+        public List<LayerNode> childs = new List<LayerNode>();
+        public Object layer { get; private set; }
+        public string assetPath { get; private set; }
+
+        private GUIContent _spritenormal;
+        private string ContentName
+        {
+            get
+            {
+                AssetImporter asset = AssetImporter.GetAtPath(assetPath);
+                if (string.IsNullOrEmpty(asset.assetBundleName))
+                {
+                    return layer.name;
+                }
+                else
+                {
+                    return string.Format("{0}  [ab]:{1}", layer.name, asset.assetBundleName);
+                }
+            }
+        }
+
+        public LayerNode(string path)
+        {
+            this.assetPath = path;
+            this.layer = AssetDatabase.LoadAssetAtPath(path, typeof(Object));
+            if (layer == null)
+            {
+                Debug.LogError(path + "null");
+            }
+            this.indent = assetPath.Split('/').Length;
+            isFolder = ProjectWindowUtil.IsFolder(layer.GetInstanceID());
+            var name = ContentName;
+            _spritenormal = new GUIContent(name, AssetDatabase.GetCachedIcon(assetPath));
+
+            content = _spritenormal;
+            isExpanded = true;
+        }
+
+        public void Expland(bool on)
+        {
+            isExpanded = on;
+        }
+        public void Select(bool on)
+        {
+            selected = on;
+            if (childs != null)
+                foreach (var child in childs)
+                {
+                    child.Select(on);
+                }
+        }
+    }
+
     [CustomEditor(typeof(ConfigBuildObj))]
     public class ConfigBuildObjDrawer : Editor
     {
-        public class LayerNode
-        {
-            public bool isExpanded { get; private set; }
-            public bool isFolder;
-            public bool selected { get; private set; }
-            public int indent { get; private set; }
-            public GUIContent content;
-            public LayerNode parent;
-            public List<LayerNode> childs = new List<LayerNode>();
-            public Object layer { get; private set; }
-            public string assetPath { get; private set; }
-
-            private GUIContent _spritenormal;
-            private string ContentName
-            {
-                get
-                {
-                    AssetImporter asset = AssetImporter.GetAtPath(assetPath);
-                    if (string.IsNullOrEmpty(asset.assetBundleName))
-                    {
-                        return layer.name;
-                    }
-                    else
-                    {
-                        return string.Format("{0}  [ab]:{1}", layer.name, asset.assetBundleName);
-                    }
-                }
-            }
-            public LayerNode(string path)
-            {
-                this.assetPath = path;
-                this.layer = AssetDatabase.LoadAssetAtPath(path, typeof(Object));
-                if (layer == null)
-                {
-                    Debug.LogError(path + "null");
-                }
-                this.indent = assetPath.Split('/').Length;
-                isFolder = ProjectWindowUtil.IsFolder(layer.GetInstanceID());
-                var name = ContentName;
-                _spritenormal = new GUIContent(name, AssetDatabase.GetCachedIcon(assetPath));
-
-                content = _spritenormal;
-                isExpanded = true;
-            }
-
-            public void Expland(bool on)
-            {
-                isExpanded = on;
-            }
-            public void Select(bool on)
-            {
-                selected = on;
-                if (childs != null)
-                    foreach (var child in childs)
-                    {
-                        child.Select(on);
-                    }
-            }
-        }
         private SerializedProperty script;
         private SerializedProperty localPath_prop;
         private SerializedProperty targetPath_prop;
@@ -78,6 +80,7 @@ namespace AssetBundleBuilder
 
         private LayerNode rootNode;
         private const string lastItem = "lastbuildObj";
+        private const string rootFolder = "Assets";
         private Vector2 scrollPos;
         private Dictionary<string, LayerNode> nodeDic;
         private GUIContent _groupff;
@@ -98,12 +101,9 @@ namespace AssetBundleBuilder
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
-
             EditorGUILayout.PropertyField(script);
-
             DrawObjOptions();
             DrawHeadTools();
-
             EditorGUI.indentLevel = 0;
             var lastrect = GUILayoutUtility.GetLastRect();
             var viewRect = new Rect(lastrect.x, lastrect.y + EditorGUIUtility.singleLineHeight, lastrect.width, 300);
@@ -120,7 +120,6 @@ namespace AssetBundleBuilder
 
             EditorGUI.indentLevel = 0;
             DrawBottomTools();
-
             serializedObject.ApplyModifiedProperties();
         }
 
@@ -146,6 +145,7 @@ namespace AssetBundleBuilder
                             AddGroupOfObject(DragAndDrop.paths);
                         }
                     }
+                    Event.current.Use();
                     break;
                 case EventType.DragExited:
                     break;
@@ -191,14 +191,7 @@ namespace AssetBundleBuilder
                 {
                     EditorGUILayout.LabelField("[菜单名]:", GUILayout.Width(100));
                     menuName_prop.stringValue = EditorGUILayout.TextField(menuName_prop.stringValue);
-                    if (GUILayout.Button("保存"))
-                    {
-                        //保存
-                        var buildObj = (target as ConfigBuildObj);
-                        buildObj.needBuilds.Clear();
-                        StoreLayerNodeToAsset(nodeDic, buildObj);
-                        EditorUtility.SetDirty(buildObj);
-                    }
+                    EditorGUILayout.LabelField("(文件夹独立)");
                 }
             }
 
@@ -212,7 +205,7 @@ namespace AssetBundleBuilder
             else
             {
                 Dictionary<string, LayerNode> nodeDic = new Dictionary<string, LayerNode>();
-                nodeDic.Add("Assets", new LayerNode("Assets"));
+                nodeDic.Add(rootFolder, new LayerNode(rootFolder));
                 foreach (var item in buildObj.needBuilds)
                 {
                     RetriveAddFolder(item.assetPath, nodeDic);
@@ -228,7 +221,7 @@ namespace AssetBundleBuilder
         private static LayerNode LoadNodesFromDic(Dictionary<string, LayerNode> nodeDic)
         {
             if (nodeDic == null) return null;
-            LayerNode root = nodeDic["Assets"];
+            LayerNode root = nodeDic[rootFolder];
             foreach (var item in nodeDic)
             {
                 item.Value.parent = null;
@@ -341,7 +334,10 @@ namespace AssetBundleBuilder
                     var selectedNode = new List<string>();
                     foreach (var item in nodeDic)
                     {
-                        if (item.Value.selected) selectedNode.Add(item.Key);
+                        if (item.Value.selected && item.Key != rootFolder)
+                        {
+                            selectedNode.Add(item.Key);
+                        }
                     }
                     foreach (var item in selectedNode)
                     {
@@ -406,6 +402,14 @@ namespace AssetBundleBuilder
                     var buildObj = target as ConfigBuildObj;
                     nodeDic = LoadDicFromObj(buildObj);
                     rootNode = LoadNodesFromDic(nodeDic);
+                }
+
+                if (GUILayout.Button(new GUIContent("s","保存配制"), GUILayout.Width(20)))
+                {
+                    var buildObj = target as ConfigBuildObj;
+                    buildObj.needBuilds.Clear();
+                    StoreLayerNodeToAsset(nodeDic, buildObj);
+                    EditorUtility.SetDirty(buildObj);
                 }
             }
         }
@@ -478,6 +482,8 @@ namespace AssetBundleBuilder
         private void DrawBottomTools()
         {
             var buildObj = target as ConfigBuildObj;
+
+          
 
             using (var hor = new EditorGUILayout.HorizontalScope())
             {

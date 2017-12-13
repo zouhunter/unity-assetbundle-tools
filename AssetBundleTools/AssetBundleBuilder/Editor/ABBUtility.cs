@@ -10,7 +10,7 @@ namespace AssetBundleBuilder
 {
     public static class ABBUtility
     {
-        public const string Menu_GlobalBuildWindow = "AssetBundle/AssetBundleBuilder/Builder/GlobalBuild";
+        public const string Menu_ProjectsBuildWindow = "AssetBundle/AssetBundleBuilder/Builder/ProjectsBuild";
         public const string Menu_ConfigBuildWindow = "AssetBundle/AssetBundleBuilder/Builder/ConfigBuild";
         public const string Menu_SelectBuildWindow = "AssetBundle/AssetBundleBuilder/Builder/SelectBuild";
         public const string Menu_BundleName = "AssetBundle/AssetBundleBuilder/Setter/BundleView";
@@ -20,7 +20,7 @@ namespace AssetBundleBuilder
         {
             ProjectWindowUtil.CreateAsset(ScriptableObject.CreateInstance<ConfigBuildObj>(), "ConfigBuildObj.asset");
         }
-        public static void BuildGlobalAssetBundle(string path, BuildAssetBundleOptions option, BuildTarget target)
+        public static void BuildProjectsAssetBundle(string path, BuildAssetBundleOptions option, BuildTarget target)
         {
             BuildAllAssetBundles(path, option, target);
         }
