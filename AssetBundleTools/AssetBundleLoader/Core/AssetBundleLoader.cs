@@ -10,7 +10,18 @@ using AssetBundleReference.Tuples;
 
 public class AssetBundleLoader :MonoBehaviour
 {
-    private const string defultMenu = "AssetBundle";
+    public static readonly string defultMenu = "AssetBundle";
+
+    static AssetBundleLoader()
+    {
+#if UNITY_WEBGL
+        defultMenu = "WebGL";
+#elif UNITY_STANDALONE
+        defultMenu = "Windows";
+#else
+        defultMenu = "AssetBundle";
+#endif
+    }
 #if UNITY_EDITOR
     //private static int m_SimulateAssetBundleInEditor;
     private static string kSimulateAssetBundles = "simulateinEditor";
