@@ -5,6 +5,8 @@ using UnityEngine.UI;
 using UnityEngine.Events;
 using System.Collections;
 using System.Collections.Generic;
+using System;
+
 namespace AssetBundleBuilder
 {
     public class ProjectsBuilderWindow : EditorWindow
@@ -21,6 +23,7 @@ namespace AssetBundleBuilder
         public BuildAssetBundleOptions buildOption = BuildAssetBundleOptions.None;
         public BuildTarget buildTarget = BuildTarget.StandaloneWindows;
         private SerializedProperty script;
+        private const string Perfer_menuName = "preferMenuName";
         private const string Perfer_buildPath = "globalbuildPath";
         private const string Perfer_localPath = "localglobalbuildPath";
 
@@ -35,7 +38,26 @@ namespace AssetBundleBuilder
             {
                 targetPath = PlayerPrefs.GetString(Perfer_localPath);
             }
+            if (PlayerPrefs.HasKey(Perfer_menuName))
+            {
+                assetBundleName = PlayerPrefs.GetString(Perfer_menuName);
+            }
             InitBuildTarget();
+            LoadDefultMenu();
+        }
+
+        private void LoadDefultMenu()
+        {
+            if (string.IsNullOrEmpty(assetBundleName))
+            {
+#if UNITY_WEBGL
+        assetBundleName = "WebGL";
+#elif UNITY_STANDALONE
+                assetBundleName = "Windows";
+#else
+        assetBundleName = "AssetBundle";
+#endif
+            }
         }
 
         private void InitBuildTarget()
@@ -52,6 +74,14 @@ namespace AssetBundleBuilder
         void OnGUI()
         {
             EditorGUILayout.PropertyField(script);
+
+            EditorGUI.BeginChangeCheck();
+            assetBundleName = EditorGUILayout.TextField("Menu", assetBundleName);
+            if(EditorGUI.EndChangeCheck())
+            {
+                PlayerPrefs.SetString(Perfer_menuName, assetBundleName);
+            }
+
             EditorGUILayout.BeginHorizontal();
             localPath = EditorGUILayout.TextField("ExportTo", localPath);
             if (GUILayout.Button("选择路径", GUILayout.Width(60)))
@@ -98,7 +128,7 @@ namespace AssetBundleBuilder
 
         private string GetFullPath(string folder)
         {
-            return System.IO.Path.Combine(folder, AssetBundleLoader.defultMenu);
+            return System.IO.Path.Combine(folder, assetBundleName);
         }
     }
 }
